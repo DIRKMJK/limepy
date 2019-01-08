@@ -6,14 +6,14 @@ README = (HERE / "README.md").read_text()
 
 
 setup(name='limepy',
-    version='0.0.0',
-    description='Download and process LimeSurvey data',
+    version='0.1.0',
+    description='Download, summarise and process LimeSurvey data',
     long_description=README,
     long_description_content_type="text/markdown",
     author='dirkmjk',
     author_email='info@dirkmjk.nl',
+    url='https://github.com/DIRKMJK/limepy',
     license="MIT",
     packages=['limepy'],
-    include_package_data=True,
     install_requires=['pandas', 'numpy', 'requests', 'xmltodict'],
     zip_safe=False)
