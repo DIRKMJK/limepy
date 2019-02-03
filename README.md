@@ -48,6 +48,8 @@ my_structure = open('../data/structure.lss').read()
 my_survey = Survey(df, my_structure)
 ```
 
+Note: if you use a merged dataframe (for example, data from various versions of the same questionnaire), you should reset the index before creating a Survey object.
+
 ## Get list of questions with metadata
 
 ```python
@@ -87,6 +89,12 @@ For many question types, limepy can summarise the results.
 
 ```python
 my_question.summary
+```
+
+To show the metadata associated with a question:
+
+```python
+my_question.metadata
 ```
 
 ## Write answers to an open-ended question
