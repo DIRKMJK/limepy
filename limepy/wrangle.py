@@ -391,7 +391,7 @@ class Question():
                     valid.extend([i for i, v in enumerate(values)
                                   if pd.notnull(v)])
                     if checkbox:
-                        value = sum(pd.notnull(v) for v in values)
+                        value = sum((v == 1) for v in values)
                     else:
                         valid_values = [float(v) for v in values
                                         if pd.notnull(v)]
