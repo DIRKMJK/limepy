@@ -87,30 +87,35 @@ class Survey():
             if 'questions' not in groups[gid]:
                 groups[gid]['questions'] = []
             groups[gid]['questions'].append(qid)
-        for answer in document['answers']['rows']['row']:
-            qid = answer['qid']
-            scale = answer['scale_id']
-            if 'answers' not in questions[qid]:
-                questions[qid]['answers'] = {}
-            if scale not in questions[qid]['answers']:
-                questions[qid]['answers'][scale] = []
-            questions[qid]['answers'][scale].append(answer)
-        for subquestion in document['subquestions']['rows']['row']:
-            parent_qid = subquestion['parent_qid']
-            scale = subquestion['scale_id']
-            if 'subquestions' not in questions[parent_qid]:
-                questions[parent_qid]['subquestions'] = {}
-            if scale not in questions[parent_qid]['subquestions']:
-                questions[parent_qid]['subquestions'][scale] = []
-            questions[parent_qid]['subquestions'][scale].append(subquestion)
-        for attribute in document['question_attributes']['rows']['row']:
-            qid = attribute['qid']
-            if 'attributes' not in questions[qid]:
-                questions[qid]['attributes'] = []
-            questions[qid]['attributes'].append(attribute)
-            if (attribute['attribute'] == 'multiflexible_checkbox'
-                    and attribute['value'] == '1'):
-                questions[qid]['question_type'] = 'Array (Numbers) Checkbox layout'
+        if 'answers' in document.keys():
+            for answer in document['answers']['rows']['row']:
+                qid = answer['qid']
+                scale = answer['scale_id']
+                if 'answers' not in questions[qid]:
+                    questions[qid]['answers'] = {}
+                if scale not in questions[qid]['answers']:
+                    questions[qid]['answers'][scale] = []
+                questions[qid]['answers'][scale].append(answer)
+        if 'subquestions' in document.keys():
+            for subquestion in document['subquestions']['rows']['row']:
+                parent_qid = subquestion['parent_qid']
+                scale = subquestion['scale_id']
+                if 'subquestions' not in questions[parent_qid]:
+                    questions[parent_qid]['subquestions'] = {}
+                if scale not in questions[parent_qid]['subquestions']:
+                    questions[parent_qid]['subquestions'][scale] = []
+                questions[parent_qid]['subquestions'][scale].append(subquestion)
+        if 'question_attributes' in document.keys():
+            for attribute in document['question_attributes']['rows']['row']:
+                if isinstance(attribute, dict):
+                    qid = attribute['qid']
+                    if 'attributes' not in questions[qid]:
+                        questions[qid]['attributes'] = []
+                    questions[qid]['attributes'].append(attribute)
+                    if (attribute['attribute'] == 'multiflexible_checkbox'
+                            and attribute['value'] == '1'):
+                        question_type = 'Array (Numbers) Checkbox layout'
+                        questions[qid]['question_type'] = question_type
         start_columns = sorted(start_columns)
         for qid, question in questions.items():
             position = float(start_columns.index(question['columns'][0]))
@@ -478,7 +483,8 @@ class Question():
             if include_respondent and background_column_indices:
                 for col_index in background_column_indices:
                     colname = self.subset.columns[col_index]
-                    respondent_txt += f"- {self.subset.loc[respondent, colname]}\n"
+                    value = self.subset.loc[respondent, colname]
+                    respondent_txt += f"- {value}\n"
             if include_respondent:
                 text += respondent_txt + '\n\n'
         return text
