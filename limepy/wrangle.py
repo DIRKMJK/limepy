@@ -283,6 +283,7 @@ class Question():
         :param method: method for calculating average (mean or median)
 
         """
+        self.survey = survey
         self.mask = mask
         self.subset = self.create_subset(survey.dataframe)
         self.metadata = survey.questions[str(int(qid))]
@@ -484,6 +485,17 @@ class Question():
                 for col_index in background_column_indices:
                     colname = self.subset.columns[col_index]
                     value = self.subset.loc[respondent, colname]
+                    for bg_qid, row in self.survey.question_list.iterrows():
+                        if (row.start + row.nr_columns) > col_index:
+                            bg_question = Question(self.survey, bg_qid)
+                            bg_metadata = bg_question.metadata
+                            break
+                    if 'answers' in bg_metadata:
+                        for scale in bg_metadata['answers']:
+                            for answer in bg_metadata['answers'][scale]:
+                                if answer['code'] == value:
+                                    value = answer['answer']
+                                    break
                     respondent_txt += f"- {value}\n"
             if include_respondent:
                 text += respondent_txt + '\n\n'
