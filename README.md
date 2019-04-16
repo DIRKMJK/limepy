@@ -64,6 +64,14 @@ The `respondent` method will return a string listing the answers of an individua
 my_survey.respondent(26)
 ```
 
+## Create a readable dataframe
+
+Create a dataframe with full questions as column names and ‘long’ responses as values.
+
+```python
+my_survey.readable_df
+```
+
 ## Create a Question object
 
 A Question object can be used to summarise data. To create a Question oject, you need a Survey object and the question id (find it in the index of the question list).

@@ -43,6 +43,7 @@ class Survey():
         self.dataframe = dataframe
         self.questions, self.groups = self.parse_structure(structure)
         self.question_list = self.create_question_list()
+        self.readable_df = self.readable_df()
 
     def get_question_type(self, question_type_code):
         """Return the name of the question type"""
@@ -140,6 +141,45 @@ class Survey():
             question_list.loc[qid, 'other'] = question['other']
         return question_list.sort_values(by='position')
 
+    def code_to_answer(self, value, mapping):
+        """Replace answer code with answer"""
+        if pd.isnull(value):
+            return None
+        if value in mapping:
+            return mapping[value]
+        return value
+
+    def readable_df(self):
+        readable_df = self.dataframe.copy()
+        """Create dataframe with readable colnames and values"""
+        colnames = list(self.dataframe.columns)
+        for qid, question in self.questions.items():
+            start, nr_columns = question['columns']
+            mapping = {}
+            if 'answers' in question:
+                for scale in question['answers']:
+                    for answer in question['answers'][scale]:
+                        mapping[answer['code']] = answer['answer']
+            for i in range(start, start + nr_columns):
+                colname = colnames[i]
+                colname = colname.replace('\n', ' ')
+                parts = re.match('(.*?)\[(.*)\]$', colname)
+                if parts:
+                    last = parts.groups()[-1]
+                    if 'subquestions' in question:
+                        for scale in question['subquestions']:
+                            for sq in question['subquestions'][scale]:
+                                last = last.replace(sq['title'], sq['question'])
+                    colname = f'{question["question"]}[{last}]'
+                else:
+                    colname = question['question']
+                colnames[i] = colname
+                if mapping:
+                    readable_df.iloc[:, i] = readable_df.iloc[:, i].map(lambda x: self.code_to_answer(x, mapping))
+
+        readable_df.columns = colnames
+        return readable_df
+
     def get_answer(self, question, answer_code):
         """Look up the answer beloning to an answer code."""
 
@@ -187,12 +227,24 @@ class Survey():
                 colname = question['title']
                 value = self.dataframe.loc[respondent_id, colname]
                 value = self.get_answer(question, value)
-                respondent += f'- {value}\n\n'
+                respondent += f'- {value}\n'
+                if question['other'] == 'Y':
+                    colname = f"{question['title']}[other]"
+                    value = self.dataframe.loc[respondent_id, colname]
+                    if pd.notnull(value):
+                        respondent += f"- Other: {value}\n"
+                respondent += '\n'
 
             # Other single-column question
             elif question['title'] in self.dataframe.columns:
                 value = self.dataframe.loc[respondent_id, question['title']]
-                respondent += f"- {value}\n\n"
+                respondent += f"- {value}\n"
+                if question['other'] == 'Y':
+                    colname = f"{question['title']}[other]"
+                    value = self.dataframe.loc[respondent_id, colname]
+                    if pd.notnull(value):
+                        respondent += f"- Other: {value}\n"
+                respondent += '\n'
 
             # Multiple choice
             elif question['type'] in ['M', 'P']:
@@ -205,7 +257,8 @@ class Survey():
                 if question['other'] == 'Y':
                     colname = f"{question['title']}[other]"
                     value = self.dataframe.loc[respondent_id, colname]
-                    respondent += f"- Other: {value}\n"
+                    if pd.notnull(value):
+                        respondent += f"- Other: {value}\n"
                 respondent += '\n'
 
             # Array
