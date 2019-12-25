@@ -38,6 +38,8 @@ def export_responses(user_id, base_url, session_key, sid, lang=None,
     }
     req = requests.post(api_url, json=payload)
     result = req.json()['result']
+    if 'status' in result:
+        raise ValueError(result['status'])
     csv = base64.b64decode(result.encode()).decode('utf-8-sig')
     return csv
 
