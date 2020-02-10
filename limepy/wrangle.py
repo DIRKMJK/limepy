@@ -166,10 +166,14 @@ class Survey():
                 parts = re.match('(.*?)\[(.*)\]$', colname)
                 if parts:
                     last = parts.groups()[-1]
+                    last = last.split('_')
                     if 'subquestions' in question:
                         for scale in question['subquestions']:
                             for sq in question['subquestions'][scale]:
-                                last = last.replace(sq['title'], sq['question'])
+                                if sq['question']:
+                                    if last[int(scale)] == sq['title']:
+                                        last[int(scale)] = sq['question']
+                    last = '_'.join(last)
                     colname = f'{question["question"]}[{last}]'
                 else:
                     colname = question['question']
