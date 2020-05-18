@@ -10,6 +10,10 @@ Note that limepy uses f-strings and therefore requires Python 3.6 or higher.
 
 Use at your own risk and please make sure to check the results.
 
+# Installation
+
+`$ pip install limepy`
+
 # How is it different
 
 There are various python packages for managing the LimeSurvey RemoteControl 2 API. While limepy can help you download survey data, the emphasis is on processing and summarising the data.
@@ -88,11 +92,11 @@ my_question = Question(my_survey, 3154, mask=pd.notnull(df.iloc[:, 8]))
 
 ## Summarise answers to a question
 
-For many question types, limepy can summarise the results. 
-- In many cases, this will return a dataframe containing value counts (as well as Percent and Valid Percent). 
-- In case of a Numerical input question, the output will be a dataframe containing the results of the pandas DataFrame `describe` method. 
-- In case of a Numbers array question, the average will be calculated for each option (but you must specify the method, i.e. 'mean' or 'median'). 
-- In case of a Ranking question, the result will be a dataframe with scores calculated for each item. 
+For many question types, limepy can summarise the results.
+- In many cases, this will return a dataframe containing value counts (as well as Percent and Valid Percent).
+- In case of a Numerical input question, the output will be a dataframe containing the results of the pandas DataFrame `describe` method.
+- In case of a Numbers array question, the average will be calculated for each option (but you must specify the method, i.e. 'mean' or 'median').
+- In case of a Ranking question, the result will be a dataframe with scores calculated for each item.
 - If no method has been implemented for a question type, a dataframe will be returned which contains the columns associated with the question.
 
 ```python
@@ -143,7 +147,7 @@ for qid, row in my_survey.question_list.iterrows():
 ```python
 def add_table(question, question_text=None):
     """Add table summarising question"""
-    
+
     if not question_text:
         question_text = question.question
     html = f"<div class='tableHeader'>{question_text}</div>\n"
