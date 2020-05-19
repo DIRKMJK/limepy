@@ -69,18 +69,46 @@ class Survey():
             structure = xmltodict.parse(structure)
         document = structure['document']
         groups = OrderedDict()
+        if 'question_l10ns' in document:
+            items = document['question_l10ns']['rows']['row']
+            if not isinstance(items, list):
+                items = [items]
+            question_l10ns = {item['qid']:item['question'] for item in items}
+            question_l10ns_help = {item['qid']:item['help'] for item in items}
+        if 'answer_l10ns' in document:
+            items = document['answer_l10ns']['rows']['row']
+            answer_l10ns = {item['aid']:item['answer'] for item in items}
+        if 'group_l10ns' in document:
+            items = document['group_l10ns']['rows']['row']
+            if isinstance(items, OrderedDict):
+                group_l10ns = {items['gid']: items['group_name']}
+            else:
+                group_l10ns = {item['gid']:item['group_name'] for item in items}
         questions = OrderedDict()
         start_columns = []
-        if isinstance(document['groups']['rows']['row'], list):
-            for group in document['groups']['rows']['row']:
-                groups[group['gid']] = group
-        else:
+        groups = {}
+        if not isinstance(document['groups']['rows']['row'], list):
             group = document['groups']['rows']['row']
+            if 'group_name' not in group:
+                group['group_name'] = group_l10ns[group['gid']]
             groups[group['gid']] = group
-        for question in document['questions']['rows']['row']:
+        else:
+            for group in document['groups']['rows']['row']:
+                if 'group_name' not in group:
+                    group['group_name'] = group_l10ns[group['gid']]
+                groups[group['gid']] = group
+
+        question_list = document['questions']['rows']['row']
+        if not isinstance(question_list, list):
+            question_list = [question_list]
+        for question in question_list:
             qid = question['qid']
             gid = question['gid']
             question['question_type'] = self.get_question_type(question['type'])
+            if 'question' not in question:
+                question['question'] = question_l10ns[qid]
+            if 'help' not in question:
+                question['help'] = question_l10ns_help[qid]
             start, length = self.get_columns(question)
             question['columns'] = start, length
             start_columns.append(start)
@@ -92,6 +120,8 @@ class Survey():
             for answer in document['answers']['rows']['row']:
                 qid = answer['qid']
                 scale = answer['scale_id']
+                if 'answer' not in answer:
+                    answer['answer'] = answer_l10ns[answer['aid']]
                 if 'answers' not in questions[qid]:
                     questions[qid]['answers'] = {}
                 if scale not in questions[qid]['answers']:
@@ -101,6 +131,8 @@ class Survey():
             for subquestion in document['subquestions']['rows']['row']:
                 parent_qid = subquestion['parent_qid']
                 scale = subquestion['scale_id']
+                if 'question' not in subquestion:
+                    subquestion['question'] = question_l10ns[subquestion['qid']]
                 if 'subquestions' not in questions[parent_qid]:
                     questions[parent_qid]['subquestions'] = {}
                 if scale not in questions[parent_qid]['subquestions']:
