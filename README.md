@@ -52,6 +52,8 @@ my_structure = open('../data/structure.lss').read()
 my_survey = Survey(df, my_structure)
 ```
 
+If you wish to remove html tags from the questions, set strip_tags=True.
+
 Note: if you use a merged dataframe (for example, data from various versions of the same questionnaire), you should reset the index before creating a Survey object.
 
 ## Get list of questions with metadata

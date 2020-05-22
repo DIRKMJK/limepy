@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 import re
+from html.parser import HTMLParser
 import pandas as pd
 import numpy as np
 import xmltodict
@@ -29,21 +30,35 @@ QUESTION_TYPES = {
 }
 
 
+class StripTags(HTMLParser):
+    def handle_data(self, data):
+        self.stripped = data
+
+
 class Survey():
     """Contains the structure and data of a LimeSurvey survey."""
 
-    def __init__(self, dataframe, structure):
+    def __init__(self, dataframe, structure, strip_tags=False):
         """
 
         :param dataframe: dataframe containing the survey export,
             heading type must be 'code'
-        :param survey_structure: survey structure, exported as .lss file
+        :param structure: survey structure, exported as .lss file
 
         """
         self.dataframe = dataframe
+        self.strip_tags = strip_tags
         self.questions, self.groups = self.parse_structure(structure)
         self.question_list = self.create_question_list()
         self.readable_df = self.readable_df()
+
+
+    def strp_tgs(self, html):
+        """Strip tags from html"""
+        parser = StripTags()
+        parser.feed(html)
+        return parser.stripped
+
 
     def get_question_type(self, question_type_code):
         """Return the name of the question type"""
@@ -109,6 +124,8 @@ class Survey():
                 question['question'] = question_l10ns[qid]
             if 'help' not in question:
                 question['help'] = question_l10ns_help[qid]
+            if self.strip_tags:
+                question['question'] = self.strp_tgs(question['question'])
             start, length = self.get_columns(question)
             question['columns'] = start, length
             start_columns.append(start)
