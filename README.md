@@ -39,14 +39,14 @@ path.write_text(csv)
 
 A Survey object contains the data and metadata of a survey. To create a Survey object, you need:
 
-- A csv containing the survey results. You can download it manually or use the api as described above. Make sure to set heading type to 'code'/'question code' and reponse type to 'short'/'answer codes'.
+- A csv containing the survey results. You can download it manually or use the api as described above. Make sure to set heading type to 'code' and reponse type to 'short'.
 - An .lss file containing the survey structure. You can download this manually.
 
 ```python
 from limepy.wrangle import Survey, Question
 import pandas as pd
 
-df = pd.read_csv('../data/data.csv', sep=';')
+df = pd.read_csv('../data/data.csv')
 with open('../data/structure.lss') as f:
     my_structure = f.read()
 
