@@ -46,7 +46,7 @@ A Survey object contains the data and metadata of a survey. To create a Survey o
 from limepy.wrangle import Survey, Question
 import pandas as pd
 
-df = pd.read_csv('../data/data.csv')
+df = pd.read_csv('../data/data.csv', sep=';')
 with open('../data/structure.lss') as f:
     my_structure = f.read()
 
