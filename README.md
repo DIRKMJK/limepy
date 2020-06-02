@@ -39,7 +39,7 @@ path.write_text(csv)
 
 A Survey object contains the data and metadata of a survey. To create a Survey object, you need:
 
-- A csv containing the survey results. You can download it manually or use the api as described above. Make sure to set heading type to 'code' and reponse type to 'short'.
+- A csv containing the survey results. You can download it manually or use the api as described above. Make sure to set heading type to 'code' and reponse type to 'short'. The file will is delimited with semicolons if downloaded by the api.
 - An .lss file containing the survey structure. You can download this manually.
 
 ```python
