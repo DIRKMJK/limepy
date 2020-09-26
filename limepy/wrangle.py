@@ -26,11 +26,11 @@ QUESTION_TYPES = {
     'S': 'Short free text',
     'X': 'Text display',
     'N': 'Numerical input',
-    'P': 'Multiple choice with comments'
 }
 
 
 class StripTags(HTMLParser):
+    """Strip html tags"""
     def handle_data(self, data):
         self.stripped = data
 
@@ -38,19 +38,22 @@ class StripTags(HTMLParser):
 class Survey():
     """Contains the structure and data of a LimeSurvey survey."""
 
-    def __init__(self, dataframe, structure, strip_tags=False):
+    def __init__(self, dataframe, structure, language=None, strip_tags=False):
         """
 
         :param dataframe: dataframe containing the survey export,
             heading type must be 'code'
         :param structure: survey structure, exported as .lss file
+        :param language: language to use (if multilingual)
+        :param strip_tags: strip html from questions
 
         """
         self.dataframe = dataframe
+        self.language = language
         self.strip_tags = strip_tags
         self.questions, self.groups = self.parse_structure(structure)
         self.question_list = self.create_question_list()
-        self.readable_df = self.readable_df()
+        self.readable_df = self.create_readable_df()
 
 
     def strp_tgs(self, html):
@@ -83,22 +86,50 @@ class Survey():
         if isinstance(structure, str):
             structure = xmltodict.parse(structure)
         document = structure['document']
+        languages = document['languages']['language']
+        if not self.language:
+            language = languages[0]
+        else:
+            language = self.language
+        if language not in languages:
+            message = f'Specified language "{language}" not available'
+            raise ValueError(message)
         groups = OrderedDict()
         if 'question_l10ns' in document:
             items = document['question_l10ns']['rows']['row']
             if not isinstance(items, list):
                 items = [items]
-            question_l10ns = {item['qid']:item['question'] for item in items}
-            question_l10ns_help = {item['qid']:item['help'] for item in items}
+            question_l10ns = {
+                item['qid']:item['question']
+                for item
+                in items
+                if item['language'] == language
+            }
+            question_l10ns_help = {
+                item['qid']:item['help']
+                for item
+                in items
+                if item['language'] == language
+            }
         if 'answer_l10ns' in document:
             items = document['answer_l10ns']['rows']['row']
-            answer_l10ns = {item['aid']:item['answer'] for item in items}
+            answer_l10ns = {
+                item['aid']:item['answer']
+                for item
+                in items
+                if item['language'] == language
+            }
         if 'group_l10ns' in document:
             items = document['group_l10ns']['rows']['row']
             if isinstance(items, OrderedDict):
                 group_l10ns = {items['gid']: items['group_name']}
             else:
-                group_l10ns = {item['gid']:item['group_name'] for item in items}
+                group_l10ns = {
+                    item['gid']:item['group_name']
+                    for item
+                    in items
+                    if item['language'] == language
+                }
         questions = OrderedDict()
         start_columns = []
         groups = {}
@@ -109,6 +140,8 @@ class Survey():
             groups[group['gid']] = group
         else:
             for group in document['groups']['rows']['row']:
+                if 'language' in group and group['language'] != language:
+                    continue
                 if 'group_name' not in group:
                     group['group_name'] = group_l10ns[group['gid']]
                 groups[group['gid']] = group
@@ -117,6 +150,8 @@ class Survey():
         if not isinstance(question_list, list):
             question_list = [question_list]
         for question in question_list:
+            if 'language' in question and question['language'] != language:
+                continue
             qid = question['qid']
             gid = question['gid']
             question['question_type'] = self.get_question_type(question['type'])
@@ -126,6 +161,8 @@ class Survey():
                 question['help'] = question_l10ns_help[qid]
             if self.strip_tags:
                 question['question'] = self.strp_tgs(question['question'])
+                if question['help']:
+                    question['help'] = self.strp_tgs(question['help'])
             start, length = self.get_columns(question)
             question['columns'] = start, length
             start_columns.append(start)
@@ -135,6 +172,8 @@ class Survey():
             groups[gid]['questions'].append(qid)
         if 'answers' in document.keys():
             for answer in document['answers']['rows']['row']:
+                if 'language' in answer and answer['language'] != language:
+                    continue
                 qid = answer['qid']
                 scale = answer['scale_id']
                 if 'answer' not in answer:
@@ -146,6 +185,8 @@ class Survey():
                 questions[qid]['answers'][scale].append(answer)
         if 'subquestions' in document.keys():
             for subquestion in document['subquestions']['rows']['row']:
+                if 'language' in subquestion and subquestion['language'] != language:
+                    continue
                 parent_qid = subquestion['parent_qid']
                 scale = subquestion['scale_id']
                 if 'question' not in subquestion:
@@ -199,11 +240,11 @@ class Survey():
             return mapping[value]
         return value
 
-    def readable_df(self):
-        readable_df = self.dataframe.copy()
+    def create_readable_df(self):
         """Create dataframe with readable colnames and values"""
+        readable_df = self.dataframe.copy()
         colnames = list(self.dataframe.columns)
-        for qid, question in self.questions.items():
+        for _, question in self.questions.items():
             start, nr_columns = question['columns']
             mapping = {}
             if 'answers' in question:
@@ -213,7 +254,7 @@ class Survey():
             for i in range(start, start + nr_columns):
                 colname = colnames[i]
                 colname = colname.replace('\n', ' ')
-                parts = re.match('(.*?)\[(.*)\]$', colname)
+                parts = re.match(r'(.*?)\[(.*)\]$', colname)
                 if parts:
                     last = parts.groups()[-1]
                     last = last.split('_')
