@@ -6,7 +6,7 @@ README = (HERE / "README.md").read_text()
 
 
 setup(name='limepy',
-    version='0.1.6',
+    version='0.1.7',
     description='Download, summarise and process LimeSurvey data',
     long_description=README,
     long_description_content_type="text/markdown",

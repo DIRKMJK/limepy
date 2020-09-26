@@ -188,6 +188,7 @@ class Survey():
             question_list.loc[qid, 'group'] = group_name
             question_list.loc[qid, 'mandatory'] = question['mandatory']
             question_list.loc[qid, 'other'] = question['other']
+            question_list.loc[qid, 'title'] = question['title']
         return question_list.sort_values(by='position')
 
     def code_to_answer(self, value, mapping):

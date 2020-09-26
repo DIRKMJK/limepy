@@ -174,5 +174,16 @@ html += add_table(my_question)
 html += "</body>"
 ```
 
+## Inspect original data
+
+If you want to inspect the original data for a specific question, for example because you want to process answers to an ‘other’ option, then you can use the question title (you can look up the title using <code>my_survey.question_list</code>.
+
+```python
+title = 'G01Q07'
+colnames = [c for c in df.columns if title in c]
+df[colnames]
+```
+
+
 [limesurvey]:https://en.wikipedia.org/wiki/LimeSurvey
 [LSRC2]:https://manual.limesurvey.org/RemoteControl_2_API
