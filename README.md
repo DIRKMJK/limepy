@@ -55,7 +55,7 @@ my_survey = Survey(df, my_structure)
 
 If you wish to remove html tags from the questions, set <code>strip_tags=True</code>.
 
-If you have a multilingual questionnaire, then you can select the language the group names, questions, answers and help texts should be presented in, e.g. <code>language='nl'</code> for Dutch. Note that with older versions of LimeSurvey, the structure of multilingual surveys may not be parsed properly (because the structure of the .lss file is different).
+If you have a multilingual questionnaire, then you can select the language the group names, questions, answers and help texts should be presented in, e.g. <code>language='nl'</code> for Dutch.
 
 Note: if you use a merged dataframe (for example, data from various versions of the same questionnaire), you should reset the index before creating a Survey object.
 
