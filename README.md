@@ -31,7 +31,7 @@ from pathlib import Path
 from limepy import download
 
 csv = download.get_responses(base_url, user_name, password, user_id, sid)
-path = Path('../data/data.csv')
+path = Path('../data/responses.csv')
 path.write_text(csv)
 ```
 
@@ -39,15 +39,16 @@ path.write_text(csv)
 
 A Survey object contains the data and metadata of a survey. To create a Survey object, you need:
 
-- A csv containing the survey results. You can download it manually or use the api as described above. Make sure to set heading type to 'code' and reponse type to 'short'.
+- A csv containing the survey results. You can download it manually or use the api as described above. Make sure to set heading type to 'code' and reponse type to 'short'. If using the api to download, the file will be delimited with `;` rather than `,`.
 - An .lss file containing the survey structure. You can download this manually.
 
 ```python
 from limepy.wrangle import Survey, Question
 import pandas as pd
 
-df = pd.read_csv('../data/data.csv', sep=';')
-my_structure = open('../data/structure.lss').read()
+df = pd.read_csv('../data/responses.csv', sep=';')
+with open('../data/structure.lss') as f:
+    my_structure = f.read()
 
 my_survey = Survey(df, my_structure)
 ```
