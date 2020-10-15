@@ -87,6 +87,8 @@ class Survey():
             structure = xmltodict.parse(structure)
         document = structure['document']
         languages = document['languages']['language']
+        if not isinstance(languages, list):
+            languages = [languages]
         if not self.language:
             language = languages[0]
         else:
