@@ -114,6 +114,27 @@ To show the metadata associated with a question:
 my_question.metadata
 ```
 
+## Compare groups
+
+Limepy currently has no method to compare groups, but you can write a function to do so (the example below may not work with all question types).
+
+```python
+def compare(qid, category_variable, how='Valid Percent'):
+    """Compare answers for groups based on category variable"""
+    summaries = []
+    for group in set(df[category_variable]):
+        if pd.isnull(group):
+            continue
+        mask = list(df[category_variable] == group)
+        q = Question(my_survey, qid, mask=mask)
+        summary = q.summary
+        if how in list(summary.columns):
+            summary = summary[[how]]
+        summary.columns = [group]
+        summaries.append(summary)
+    return pd.concat(summaries, axis=1)
+```
+
 ## Write answers to an open-ended question
 
 The `write_open_ended` method creates a string listing all the answers to the question. Optionally, you can specify a list of indices of columns that contain background information you want included in the output.
