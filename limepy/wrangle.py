@@ -112,6 +112,7 @@ class Survey():
                 for item
                 in items
                 if item['language'] == language
+                and 'help' in item
             }
         if 'answer_l10ns' in document:
             items = document['answer_l10ns']['rows']['row']
@@ -160,7 +161,10 @@ class Survey():
             if 'question' not in question:
                 question['question'] = question_l10ns[qid]
             if 'help' not in question:
-                question['help'] = question_l10ns_help[qid]
+                try:
+                    question['help'] = question_l10ns_help[qid]
+                except KeyError:
+                    question['help'] = None
             if self.strip_tags:
                 question['question'] = self.strp_tgs(question['question'])
                 if question['help']:
