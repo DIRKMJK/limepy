@@ -276,7 +276,8 @@ class Survey():
                     colname = f'{question["question"]}[{last}]'
                 else:
                     colname = question['question']
-                colnames[i] = colname
+                if colname:
+                    colnames[i] = colname
                 if mapping:
                     readable_df.iloc[:, i] = readable_df.iloc[:, i].map(lambda x: self.code_to_answer(x, mapping))
 
@@ -323,7 +324,10 @@ class Survey():
                 group_title = self.groups[question['gid']]['group_name'].upper()
                 respondent += group_title + '\n\n'
                 current_group_id = question['gid']
-            respondent += question['question'] + '\n'
+            if isinstance(question['question'], str):
+                respondent += question['question'] + '\n'
+            else:
+                respondent += f'[question {qid}]'
 
             # List (radio, dropdown)
             if question['type'] in ['!', 'L', 'O']:
