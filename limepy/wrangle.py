@@ -252,6 +252,8 @@ class Survey():
         colnames = list(self.dataframe.columns)
         for _, question in self.questions.items():
             start, nr_columns = question['columns']
+            if start == -99:
+                continue
             mapping = {}
             if 'answers' in question:
                 for scale in question['answers']:
