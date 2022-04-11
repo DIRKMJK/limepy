@@ -522,8 +522,11 @@ class Question():
                 valid.extend([i for i, v in enumerate(values)
                               if pd.notnull(v)])
                 sq_label = subquestion['question']
+                print(colname, sq_label)
+                print(values)
                 for answer in self.metadata['answers']['0']:
                     count = list(values).count(answer['code'])
+                    print(answer, count)
                     answer_label = answer['answer']
                     summary.loc[sq_label, answer_label] = count
 
