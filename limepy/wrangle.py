@@ -124,7 +124,7 @@ class Survey():
             }
         if 'group_l10ns' in document:
             items = document['group_l10ns']['rows']['row']
-            if isinstance(items, OrderedDict):
+            if isinstance(items, (OrderedDict, dict)):
                 group_l10ns = {items['gid']: items['group_name']}
             else:
                 group_l10ns = {
