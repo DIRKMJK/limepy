@@ -47,7 +47,7 @@ from limepy.wrangle import Survey, Question
 import pandas as pd
 
 df = pd.read_csv('../data/responses.csv', sep=';')
-with open('../data/structure.lss') as f:
+with open('../data/structure.lss', encoding="utf8") as f:
     my_structure = f.read()
 
 my_survey = Survey(df, my_structure)
